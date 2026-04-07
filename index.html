@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ガチャガチャ · Literary Oracle</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Wafu (Japanese Style) Color Palette */
+    --washi-bg: #f4f1ea;
+    --washi-dark: #e8e3d7;
+    --text-ink: #2b2b2a;
+    --text-light: #706d65;
+    --accent-red: #9e3d3f; /* Enji */
+    --accent-green: #6a7b53; /* Matchaba */
+    --wood-base: #5c4033;
+    --border-ink: rgba(43, 43, 42, 0.4);
+    
+    --radius-md: 6px;
+    --font-sans: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    --font-serif: 'Yu Mincho', 'Sawarabi Mincho', 'Shippori Mincho', 'MS Mincho', serif;
+  }
+
+  body {
+    background: var(--washi-bg);
+    color: var(--text-ink);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    background-image: 
+      radial-gradient(var(--washi-dark) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* API Config Panel */
+  .api-config {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-ink);
+  }
+
+  .api-config select, .api-config input {
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-ink);
+    background: #fff;
+    font-family: var(--font-sans);
+  }
+  
+  .api-config select { width: 130px; }
+  .api-config input { flex: 1; }
+
+  /* Header */
+  .gacha-title {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--accent-red);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.2rem;
+  }
+
+  .gacha-subtitle {
+    font-size: 12px;
+    color: var(--text-light);
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  /* Input Form */
+  .source-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .source-form input {
+    flex: 1;
+    font-size: 15px;
+    padding: 0 14px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-ink);
+    background: #fff;
+    outline: none;
+    font-family: var(--font-serif);
+  }
+  .source-form input:focus { border-color: var(--accent-red); }
+
+  .source-form button {
+    height: 42px;
+    padding: 0 20px;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-ink);
+    background: var(--accent-green);
+    color: #fff;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+  }
+  .source-form button:hover { opacity: 0.8; }
+
+  .machine-label {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: var(--accent-red);
+    margin-bottom: 1.5rem;
+    min-height: 24px;
+    font-weight: bold;
+  }
+
+  /* Gacha Machine */
+  .machine-wrap {
+    position: relative;
+    width: 240px;
+    margin-bottom: 2rem;
+    user-select: none;
+  }
+
+  .machine-body {
+    width: 240px;
+    height: 290px;
+    border-radius: 20px 20px 0 0;
+    border: 2px solid var(--border-ink);
+    background: #e1d8c7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+  }
+
+  .globe {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 2px solid var(--border-ink);
+    background: rgba(255,255,255,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* Glass glare effect */
+  .globe::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    width: 40px;
+    height: 20px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+  }
+
+  .capsule-pile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 20px;
+    justify-content: center;
+    align-items: flex-end;
+    height: 100%;
+  }
+
+  .cap {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border-ink);
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.1);
+  }
+
+  .machine-slot {
+    width: 50px;
+    height: 35px;
+    border-radius: 8px;
+    border: 2px solid var(--border-ink);
+    background: #2b2b2a;
+    margin-top: 20px;
+  }
+
+  .machine-base {
+    width: 260px;
+    height: 30px;
+    border-radius: 0 0 8px 8px;
+    border: 2px solid var(--border-ink);
+    background: var(--wood-base);
+    margin-left: -10px;
+  }
+
+  .knob-ring {
+    position: absolute;
+    right: -30px;
+    top: 55%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--border-ink);
+    background: #d4c8b3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  }
+  .knob-ring:active { transform: scale(0.95); }
+  .knob-ring.spinning { animation: spinKnob 0.5s ease-in-out; }
+
+  @keyframes spinKnob {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .knob-bar {
+    width: 40px;
+    height: 10px;
+    background: var(--border-ink);
+    border-radius: 4px;
+  }
+
+  .turn-hint {
+    font-size: 13px;
+    color: var(--text-light);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    min-height: 18px;
+  }
+
+  #soundText {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: var(--accent-red);
+    font-weight: bold;
+    margin-bottom: 1rem;
+    min-height: 24px;
+    display: none;
+  }
+
+  /* Capsule Area */
+  .egg-area {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .gacha-capsule {
+    width: 90px;
+    height: 90px;
+    cursor: pointer;
+    display: none;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  
+  .gacha-capsule svg { width: 100%; height: 100%; overflow: visible; }
+  .gacha-capsule.cracking { animation: eggShake 0.4s ease-in-out; }
+  .gacha-capsule.open .crack-top { animation: crackOpen 0.5s ease forwards; }
+
+  @keyframes eggShake {
+    0%,100% { transform: rotate(0deg); }
+    20% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    75% { transform: rotate(-5deg); }
+  }
+
+  @keyframes crackOpen {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-40px) rotate(-25deg); opacity: 0; }
+  }
+
+  /* Quote Card */
+  .quote-card {
+    display: none;
+    max-width: 480px;
+    width: 100%;
+    border: 1px solid var(--border-ink);
+    border-radius: var(--radius-md);
+    background: #fff;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.05);
+    animation: fadeUp 0.6s ease;
+    position: relative;
+  }
+
+  /* Vertical writing mode for traditional Japanese feel (optional, applied to quote) */
+  .quote-text {
+    font-size: 17px;
+    line-height: 2;
+    color: var(--text-ink);
+    font-family: var(--font-serif);
+    margin-bottom: 1.5rem;
+  }
+
+  .quote-source {
+    font-size: 13px;
+    color: var(--text-light);
+    border-top: 1px dashed var(--border-ink);
+    padding-top: 1rem;
+    font-family: var(--font-sans);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .loading-dots {
+    display: none;
+    gap: 6px;
+    margin: 1rem 0;
+  }
+  .loading-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-red);
+    animation: dotBounce 1s infinite ease-in-out;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes dotBounce {
+    0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .again-btn {
+    display: none;
+    margin-top: 1.5rem;
+    padding: 10px 24px;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-ink);
+    background: transparent;
+    color: var(--text-ink);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.2s;
+  }
+  .again-btn:hover { background: rgba(0,0,0,0.05); }
+
+  .error-msg {
+    font-size: 14px;
+    color: var(--accent-red);
+    margin-top: 0.5rem;
+    display: none;
+    text-align: center;
+    font-family: var(--font-sans);
+  }
+</style>
+</head>
+<body>
+
+<div class="api-config">
+  <select id="apiProvider">
+    <option value="gemini">Google Gemini</option>
+    <option value="openai">OpenAI</option>
+    <option value="deepseek">DeepSeek</option>
+    <option value="anthropic">Anthropic</option>
+  </select>
+  <input type="password" id="apiKey" placeholder="Enter API Key here..." />
+</div>
+
+<p class="gacha-title">ガチャガチャ</p>
+<p class="gacha-subtitle">LITERARY ORACLE MACHINE</p>
+
+<div class="source-form">
+  <input type="text" id="sourceInput" placeholder="e.g. 羅生門 (Rashomon), Blade Runner..." maxlength="80" />
+  <button onclick="setSource()">Set</button>
+</div>
+
+<div class="machine-label" id="machineLabel"></div>
+
+<div class="machine-wrap">
+  <div class="machine-body">
+    <div class="globe">
+      <div class="capsule-pile" id="capsulePile"></div>
+    </div>
+    <div class="machine-slot"></div>
+  </div>
+  <div class="machine-base"></div>
+  <div class="knob-ring" id="knob" onclick="turnKnob()">
+    <div class="knob-bar"></div>
+  </div>
+</div>
+
+<div class="turn-hint" id="turnHint">← turn the knob</div>
+<div id="soundText">ガチャ　ガチャ　ポンッ！</div>
+
+<div class="egg-area">
+  <div class="loading-dots" id="loadingDots">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="gacha-capsule" id="eggShell" onclick="openEgg()">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <g class="crack-top">
+        <path d="M 15 50 A 35 35 0 0 1 85 50 Z" fill="rgba(255,255,255,0.7)" stroke="var(--border-ink)" stroke-width="2"/>
+        <path d="M 30 25 A 20 20 0 0 1 60 20" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <path d="M 15 50 A 35 35 0 0 0 85 50 Z" fill="var(--accent-red)" stroke="var(--border-ink)" stroke-width="2"/>
+      <rect x="12" y="47" width="76" height="6" fill="#e8e3d7" rx="3" stroke="var(--border-ink)" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <div class="quote-card" id="quoteCard">
+    <div class="quote-text" id="quoteText"></div>
+    <div class="quote-source" id="quoteSource"></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+  <button class="again-btn" id="againBtn" onclick="resetForAnother()">もう一回 ↻</button>
+</div>
+
+<script>
+  const CAP_COLORS = ['#9e3d3f','#6a7b53','#d0af4c','#5c7a8c','#c4604f','#897d91'];
+  let currentSource = '';
+  let pendingQuote = null;
+  let eggOpened = false;
+
+  function buildCapsules() {
+    const pile = document.getElementById('capsulePile');
+    pile.innerHTML = '';
+    for (let i = 0; i < 20; i++) {
+      const d = document.createElement('div');
+      d.className = 'cap';
+      // Pick random color from traditional palette
+      const color = CAP_COLORS[Math.floor(Math.random() * CAP_COLORS.length)];
+      d.style.background = `linear-gradient(to bottom, rgba(255,255,255,0.6) 45%, ${color} 50%)`;
+      d.style.transform = `rotate(${Math.random()*360}deg) translate(${Math.random()*10-5}px, ${Math.random()*10-5}px)`;
+      pile.appendChild(d);
+    }
+  }
+  buildCapsules();
+
+  function setSource() {
+    const val = document.getElementById('sourceInput').value.trim();
+    if (!val) return;
+    currentSource = val;
+    document.getElementById('machineLabel').textContent = '「 ' + val + ' 」';
+    document.getElementById('turnHint').textContent = '← turn the knob to dispense';
+    resetUI();
+    buildCapsules();
+  }
+
+  function resetUI() {
+    document.getElementById('quoteCard').style.display = 'none';
+    document.getElementById('eggShell').style.display = 'none';
+    document.getElementById('againBtn').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+    pendingQuote = null;
+    eggOpened = false;
+  }
+
+  document.getElementById('sourceInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') setSource();
+  });
+
+  function showSound() {
+    const el = document.getElementById('soundText');
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 1800);
+  }
+
+  async function turnKnob() {
+    if (!currentSource) {
+      const inp = document.getElementById('sourceInput');
+      inp.focus();
+      inp.style.borderColor = 'var(--accent-red)';
+      setTimeout(() => inp.style.borderColor = 'var(--border-ink)', 1000);
+      return;
+    }
+
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) {
+      const err = document.getElementById('errorMsg');
+      err.textContent = 'Please enter an API Key at the top first.';
+      err.style.display = 'block';
+      return;
+    }
+
+    if (document.getElementById('loadingDots').style.display === 'flex') return;
+
+    const knob = document.getElementById('knob');
+    knob.classList.add('spinning');
+    setTimeout(() => knob.classList.remove('spinning'), 500);
+    showSound();
+    resetUI();
+
+    document.getElementById('loadingDots').style.display = 'flex';
+    document.getElementById('turnHint').textContent = '';
+
+    const provider = document.getElementById('apiProvider').value;
+    const systemPrompt = `You are a literary mystery oracle. When given a film or book title, produce ONE memorable, meaningful quote from it.
+Respond ONLY with a JSON object:
+{
+  "quote": "the exact quote",
+  "context": "who said it / scene (max 12 words)",
+  "note": "why it's meaningful (max 20 words)"
+}`;
+    const userPrompt = `Give me a meaningful quote from: "${currentSource}"`;
+
+    try {
+      let rawJsonText = '';
+
+      if (provider === 'gemini') {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
+          })
+        });
+        const data = await res.json();
+        if(data.error) throw new Error(data.error.message);
+        rawJsonText = data.candidates[0].content.parts[0].text;
+
+      } else if (provider === 'openai' || provider === 'deepseek') {
+        const endpoint = provider === 'openai' 
+          ? 'https://api.openai.com/v1/chat/completions' 
+          : 'https://api.deepseek.com/chat/completions';
+        const model = provider === 'openai' ? 'gpt-4o-mini' : 'deepseek-chat';
+        
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            response_format: { type: "json_object" }
+          })
+        });
+        const data = await res.json();
+        if(data.error) throw new Error(data.error.message);
+        rawJsonText = data.choices[0].message.content;
+
+      } else if (provider === 'anthropic') {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerously-allow-browser': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-haiku-20240307',
+            max_tokens: 1000,
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }]
+          })
+        });
+        const data = await res.json();
+        if(data.error) throw new Error(data.error.message);
+        rawJsonText = data.content[0].text;
+      }
+
+      // Clean up markdown code blocks if the LLM adds them
+      const cleanJson = rawJsonText.replace(/```json|```/g, '').trim();
+      pendingQuote = JSON.parse(cleanJson);
+
+    } catch (e) {
+      document.getElementById('loadingDots').style.display = 'none';
+      const err = document.getElementById('errorMsg');
+      err.textContent = 'Connection error: ' + e.message;
+      err.style.display = 'block';
+      document.getElementById('turnHint').textContent = '← try again';
+      return;
+    }
+
+    document.getElementById('loadingDots').style.display = 'none';
+    const egg = document.getElementById('eggShell');
+    egg.style.display = 'block';
+    
+    // Pick a random color for the dispensed capsule bottom
+    const randColor = CAP_COLORS[Math.floor(Math.random() * CAP_COLORS.length)];
+    egg.querySelector('path:nth-of-type(2)').setAttribute('fill', randColor);
+
+    egg.classList.remove('cracking','open');
+    void egg.offsetWidth;
+    egg.classList.add('cracking');
+    setTimeout(() => egg.classList.remove('cracking'), 400);
+    document.getElementById('turnHint').textContent = '↑ tap the capsule to open';
+  }
+
+  function openEgg() {
+    if (!pendingQuote || eggOpened) return;
+    eggOpened = true;
+
+    const egg = document.getElementById('eggShell');
+    egg.classList.add('open');
+
+    setTimeout(() => {
+      egg.style.display = 'none';
+      document.getElementById('quoteText').textContent = '\u201C' + pendingQuote.quote + '\u201D';
+      document.getElementById('quoteSource').innerHTML =
+        `<strong>${currentSource}</strong><br>` +
+        (pendingQuote.context ? pendingQuote.context + '<br>' : '') +
+        (pendingQuote.note ? '<span style="opacity:0.7;font-size:0.9em;">' + pendingQuote.note + '</span>' : '');
+      
+      document.getElementById('quoteCard').style.display = 'block';
+      document.getElementById('againBtn').style.display = 'inline-block';
+      document.getElementById('turnHint').textContent = '';
+    }, 500);
+  }
+
+  function resetForAnother() {
+    resetUI();
+    document.getElementById('turnHint').textContent = '← turn the knob again';
+    buildCapsules();
+  }
+</script>
+</body>
+</html>
