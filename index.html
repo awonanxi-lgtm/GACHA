@@ -697,19 +697,21 @@ Respond ONLY with a JSON object format below. Fill in both original language and
       let rawJsonText = '';
 
       if (provider === 'gemini') {
-        // FIXED: Reverting to the highly stable gemini-1.5-flash as requested!
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
+        // EXACT CODE FROM EGGNOCK-2
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+        const opts = { 
+          method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            generationConfig: { maxOutputTokens: 250, temperature: 0.7 }
-          })
-        });
+          body: JSON.stringify({ 
+            system_instruction: { parts: [{ text: systemPrompt }] }, 
+            contents: [{ role: 'user', parts: [{ text: userPrompt }] }], 
+            generationConfig: { maxOutputTokens: 280 } 
+          }) 
+        };
+        const res = await fetch(url, opts);
         const data = await res.json();
         if(data.error) throw new Error(data.error.message);
-        rawJsonText = data.candidates[0].content.parts[0].text;
+        rawJsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
       } else if (provider === 'openai' || provider === 'deepseek') {
         const endpoint = provider === 'openai' ? 'https://api.openai.com/v1/chat/completions' : 'https://api.deepseek.com/chat/completions';
@@ -720,13 +722,13 @@ Respond ONLY with a JSON object format below. Fill in both original language and
           body: JSON.stringify({
             model: model,
             messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-            max_tokens: 250,
+            max_tokens: 280,
             response_format: { type: "json_object" }
           })
         });
         const data = await res.json();
         if(data.error) throw new Error(data.error.message);
-        rawJsonText = data.choices[0].message.content;
+        rawJsonText = data.choices?.[0]?.message?.content || '';
 
       } else if (provider === 'anthropic') {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -734,18 +736,25 @@ Respond ONLY with a JSON object format below. Fill in both original language and
           headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerously-allow-browser': 'true' },
           body: JSON.stringify({
             model: 'claude-3-haiku-20240307',
-            max_tokens: 250,
+            max_tokens: 280,
             system: systemPrompt,
             messages: [{ role: 'user', content: userPrompt }]
           })
         });
         const data = await res.json();
         if(data.error) throw new Error(data.error.message);
-        rawJsonText = data.content[0].text;
+        rawJsonText = data.content?.[0]?.text || '';
       }
 
-      const cleanJson = rawJsonText.replace(/```json|```/g, '').trim();
-      pendingQuote = JSON.parse(cleanJson);
+      // Exact parsing logic matching Eggnock 2
+      let parsed;
+      try { 
+        parsed = JSON.parse(rawJsonText.replace(/```json|```/g,'').trim()); 
+      } catch(e) { 
+        parsed = { quote_original: "Error parsing AI response.", quote_english: rawJsonText }; 
+      }
+      
+      pendingQuote = parsed;
       pendingQuote.is_ssr = false; 
       revealEgg();
 
@@ -782,8 +791,8 @@ Respond ONLY with a JSON object format below. Fill in both original language and
 
     setTimeout(() => {
       egg.style.display = 'none';
-      document.getElementById('quoteOriginal').textContent = '\u201C' + pendingQuote.quote_original + '\u201D';
-      document.getElementById('quoteEnglish').textContent = '\u201C' + pendingQuote.quote_english + '\u201D';
+      document.getElementById('quoteOriginal').textContent = '\u201C' + (pendingQuote.quote_original || '...') + '\u201D';
+      document.getElementById('quoteEnglish').textContent = '\u201C' + (pendingQuote.quote_english || '...') + '\u201D';
       
       // Formatting the Source block beautifully with Original + English
       let sourceHTML = '';
