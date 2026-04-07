@@ -697,8 +697,8 @@ Respond ONLY with a JSON object format below. Fill in both original language and
       let rawJsonText = '';
 
       if (provider === 'gemini') {
-        // FIXED: Switched endpoint to the modern standard gemini-2.0-flash to bypass legacy v1beta alias restrictions
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+        // FIXED: Reverting to the highly stable gemini-1.5-flash as requested!
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
