@@ -354,7 +354,7 @@
     position: relative;
   }
 
-  .quote-english {
+  .quote-translated {
     font-size: 15px;
     font-weight: 700;
     line-height: 1.5;
@@ -364,7 +364,7 @@
   }
 
   .quote-original::before { content: '✨'; position: absolute; font-size: 14px; opacity: 0.6; top: -15px; left: -10px; }
-  .quote-english::after { content: '✨'; position: absolute; font-size: 14px; opacity: 0.6; bottom: -15px; right: -10px; }
+  .quote-translated::after { content: '✨'; position: absolute; font-size: 14px; opacity: 0.6; bottom: -15px; right: -10px; }
 
   .quote-source {
     font-size: 14px;
@@ -464,7 +464,7 @@
 <p class="gacha-subtitle">2D LITERARY ORACLE</p>
 
 <div class="source-form">
-  <input type="text" id="sourceInput" placeholder="作品名を入力 (例: 原神, ぼっち・ざ・ろっく!)" maxlength="80" />
+  <input type="text" id="sourceInput" placeholder="作品名を入力 (例: 原神, Harry Potter...)" maxlength="80" />
   <button onclick="setSource()">セット</button>
 </div>
 
@@ -504,7 +504,7 @@
 
   <div class="quote-card" id="quoteCard">
     <div class="quote-original" id="quoteOriginal"></div>
-    <div class="quote-english" id="quoteEnglish"></div>
+    <div class="quote-translated" id="quoteTranslated"></div>
     <div class="quote-source" id="quoteSource"></div>
   </div>
 
@@ -516,40 +516,36 @@
   // ── Offline Bilingual Quote Library (Gacha Pool) ─────────────────────────
   const OFFLINE_DB = {
     "evangelion": [
-      { title_original: "新世紀エヴァンゲリオン", title_english: "Neon Genesis Evangelion", author_original: "庵野秀明", author_english: "Hideaki Anno", context_original: "碇シンジ", context_english: "Shinji Ikari", quote_original: "逃げちゃダメだ、逃げちゃダメだ、逃げちゃダメだ。", quote_english: "I mustn't run away, I mustn't run away, I mustn't run away.", note: "Three words that define a generation of anxious heroes." }
+      { title_original: "新世紀エヴァンゲリオン", title_translated: "Neon Genesis Evangelion", author_original: "庵野秀明", author_translated: "Hideaki Anno", context_original: "碇シンジ", context_translated: "Shinji Ikari", quote_original: "逃げちゃダメだ、逃げちゃダメだ、逃げちゃダメだ。", quote_translated: "I mustn't run away, I mustn't run away, I mustn't run away.", fortune: "Lucky Color: Purple 🟣 You will face your fears today!" }
     ],
     "attack on titan": [
-      { title_original: "進撃の巨人", title_english: "Attack on Titan", author_original: "諫山創", author_english: "Hajime Isayama", context_original: "エレン・イェーガー", context_english: "Eren Yeager", quote_original: "戦え！戦わなければ勝てない！", quote_english: "Fight! If you don't fight, you can't win!", note: "A rallying cry that slowly curdles into something darker." },
-      { title_original: "進撃の巨人", title_english: "Attack on Titan", author_original: "諫山創", author_english: "Hajime Isayama", context_original: "エルヴィン・スミス", context_english: "Erwin Smith", quote_original: "心臓を捧げよ！", quote_english: "Dedicate your heart!", note: "Ultimate dedication." }
+      { title_original: "進撃の巨人", title_translated: "Attack on Titan", author_original: "諫山創", author_translated: "Hajime Isayama", context_original: "エレン・イェーガー", context_translated: "Eren Yeager", quote_original: "戦え！戦わなければ勝てない！", quote_translated: "Fight! If you don't fight, you can't win!", fortune: "Fortune: Huge energy! Do 10 pushups for extra luck." },
+      { title_original: "進撃の巨人", title_translated: "Attack on Titan", author_original: "諫山創", author_translated: "Hajime Isayama", context_original: "エルヴィン・スミス", context_translated: "Erwin Smith", quote_original: "心臓を捧げよ！", quote_translated: "Dedicate your heart!", fortune: "Advice: Commit fully to your passions today! ❤️" }
     ],
     "fullmetal alchemist": [
-      { title_original: "鋼の錬金術師", title_english: "Fullmetal Alchemist", author_original: "荒川弘", author_english: "Hiromu Arakawa", context_original: "エドワード・エルリック", context_english: "Edward Elric", quote_original: "立って歩け。前へ進め。あんたには立派な足がついてるじゃないか。", quote_english: "Stand up and walk. Keep moving forward. You've got two good legs, don't you?", note: "Alchemy as life philosophy." }
+      { title_original: "鋼の錬金術師", title_translated: "Fullmetal Alchemist", author_original: "荒川弘", author_translated: "Hiromu Arakawa", context_original: "エドワード・エルリック", context_translated: "Edward Elric", quote_original: "立って歩け。前へ進め。あんたには立派な足がついてるじゃないか。", quote_translated: "Stand up and walk. Keep moving forward. You've got two good legs, don't you?", fortune: "Lucky Activity: Take a short walk outside to clear your mind. 🚶‍♂️" }
     ],
     "demon slayer": [
-      { title_original: "鬼滅の刃", title_english: "Demon Slayer", author_original: "吾峠呼世晴", author_english: "Koyoharu Gotouge", context_original: "煉獄杏寿郎", context_english: "Kyojuro Rengoku", quote_original: "胸を張って生きろ。", quote_english: "Live with your chest high.", note: "A blazing legacy passed down to the next generation." }
+      { title_original: "鬼滅の刃", title_translated: "Demon Slayer", author_original: "吾峠呼世晴", author_translated: "Koyoharu Gotouge", context_original: "煉獄杏寿郎", context_translated: "Kyojuro Rengoku", quote_original: "胸を張って生きろ。", quote_translated: "Live with your chest high.", fortune: "Lucky Food: Sweet Potatoes (Umai!) 🍠" }
     ],
     "genshin impact": [
-      { title_original: "原神", title_english: "Genshin Impact", author_original: "HoYoverse", author_english: "HoYoverse", context_original: "ウェンティ", context_english: "Venti", quote_original: "風の赴くままに。", quote_english: "Let the wind lead.", note: "Wandering as identity — the game's emotional core." }
+      { title_original: "原神", title_translated: "Genshin Impact", author_original: "HoYoverse", author_translated: "HoYoverse", context_original: "ウェンティ", context_translated: "Venti", quote_original: "風の赴くままに。", quote_translated: "Let the wind lead.", fortune: "Fortune: A cool breeze will bring you good news today. 🍃" }
     ],
     "bocchi the rock": [
-      { title_original: "ぼっち・ざ・ろっく！", title_english: "Bocchi the Rock!", author_original: "はまじあき", author_english: "Aki Hamaji", context_original: "後藤ひとり", context_english: "Hitori Gotoh", quote_original: "ギターなら…私が…弾きます…！", quote_english: "If it's the guitar... I'll... play it...!", note: "Social anxiety stripped to its beautiful, terrified core." }
+      { title_original: "ぼっち・ざ・ろっく！", title_translated: "Bocchi the Rock!", author_original: "はまじあき", author_translated: "Aki Hamaji", context_original: "後藤ひとり", context_translated: "Hitori Gotoh", quote_original: "ギターなら…私が…弾きます…！", quote_translated: "If it's the guitar... I'll... play it...!", fortune: "Advice: It is okay to be awkward. You rock! 🎸" }
     ],
     "spirited away": [
-      { title_original: "千と千尋の神隠し", title_english: "Spirited Away", author_original: "宮崎駿", author_english: "Hayao Miyazaki", context_original: "銭婆", context_english: "Zeniba", quote_original: "一度あったことは忘れないものさ。思い出せないだけで。", quote_english: "Once you've met someone, you never really forget them. It just takes a while for your memories to return.", note: "On memory, identity, and the traces people leave behind." }
-    ],
-    "your name": [
-      { title_original: "君の名は。", title_english: "Your Name.", author_original: "新海誠", author_english: "Makoto Shinkai", context_original: "立花瀧 & 宮水三葉", context_english: "Taki & Mitsuha", quote_original: "君の名前は…！", quote_english: "Your name is...!", note: "Memory as the only bridge across an impossible distance." }
+      { title_original: "千と千尋の神隠し", title_translated: "Spirited Away", author_original: "宮崎駿", author_translated: "Hayao Miyazaki", context_original: "銭婆", context_translated: "Zeniba", quote_original: "一度あったことは忘れないものさ。思い出せないだけで。", quote_translated: "Once you've met someone, you never really forget them. It just takes a while for your memories to return.", fortune: "Lucky Charm: An old photo or keepsake. 📸" }
     ],
     "naruto": [
-      { title_original: "NARUTO -ナルト-", title_english: "Naruto", author_original: "岸本斉史", author_english: "Masashi Kishimoto", context_original: "うずまきナルト", context_english: "Naruto Uzumaki", quote_original: "まっすぐ自分の言葉は曲げねぇ。それが俺の忍道だ。", quote_english: "I never go back on my word. That's my ninja way.", note: "A promise that shapes a destiny." }
+      { title_original: "NARUTO -ナルト-", title_translated: "Naruto", author_original: "岸本斉史", author_translated: "Masashi Kishimoto", context_original: "うずまきナルト", context_translated: "Naruto Uzumaki", quote_original: "まっすぐ自分の言葉は曲げねぇ。それが俺の忍道だ。", quote_translated: "I never go back on my word. That's my ninja way.", fortune: "Lucky Food: Ramen! 🍜 Keep your promises today." }
     ]
   };
 
   const SSR_DROPS = [
-    { title_original: "SLAM DUNK", title_english: "Slam Dunk", author_original: "井上雄彦", author_english: "Takehiko Inoue", context_original: "安西先生", context_english: "Coach Anzai", quote_original: "諦めたらそこで試合終了ですよ…？", quote_english: "If you give up, the game is already over.", note: "A universal truth disguised as sports advice." },
-    { title_original: "天元突破グレンラガン", title_english: "Gurren Lagann", author_original: "今石洋之 / 中島かずき", author_english: "Hiroyuki Imaishi / Kazuki Nakashima", context_original: "カミナ", context_english: "Kamina", quote_original: "俺のドリルは天を突くドリルだ！", quote_english: "My drill is the drill that creates the heavens!", note: "Indomitable spirit in its purest form." },
-    { title_original: "コードギアス 反逆のルルーシュ", title_english: "Code Geass", author_original: "谷口悟朗 / 大河内一楼", author_english: "Goro Taniguchi / Ichiro Okouchi", context_original: "ルルーシュ・ヴィ・ブリタニア", context_english: "Lelouch vi Britannia", quote_original: "撃っていいのは撃たれる覚悟のある奴だけだ。", quote_english: "The only ones who should kill are those who are prepared to be killed.", note: "The terrible weight of wielding power." },
-    { title_original: "葬送のフリーレン", title_english: "Frieren: Beyond Journey's End", author_original: "山田鐘人 / アベツカサ", author_english: "Kanehito Yamada / Tsukasa Abe", context_original: "フリーレン", context_english: "Frieren", quote_original: "人間の寿命は短いってわかっていたのに…なんでもっと知ろうと思わなかったんだろう…", quote_english: "I knew human lives were short... why didn't I try to get to know him better?", note: "The heavy realization of the value of time." }
+    { title_original: "SLAM DUNK", title_translated: "Slam Dunk", author_original: "井上雄彦", author_translated: "Takehiko Inoue", context_original: "安西先生", context_translated: "Coach Anzai", quote_original: "諦めたらそこで試合終了ですよ…？", quote_translated: "If you give up, the game is already over.", fortune: "SSR Fortune: Absolute victory is near! Keep pushing! 🏀" },
+    { title_original: "天元突破グレンラガン", title_translated: "Gurren Lagann", author_original: "今石洋之 / 中島かずき", author_translated: "Hiroyuki Imaishi / Kazuki Nakashima", context_original: "カミナ", context_translated: "Kamina", quote_original: "俺のドリルは天を突くドリルだ！", quote_translated: "My drill is the drill that creates the heavens!", fortune: "SSR Fortune: Pierce through the heavens! Nothing can stop you! 🚀" },
+    { title_original: "コードギアス 反逆のルルーシュ", title_translated: "Code Geass", author_original: "谷口悟朗 / 大河内一楼", author_translated: "Goro Taniguchi / Ichiro Okouchi", context_original: "ルルーシュ・ヴィ・ブリタニア", context_translated: "Lelouch vi Britannia", quote_original: "撃っていいのは撃たれる覚悟のある奴だけだ。", quote_translated: "The only ones who should kill are those who are prepared to be killed.", fortune: "SSR Fortune: Big brain energy today. Plan your next move carefully. ♟️" }
   ];
 
   function getOfflineQuote(source) {
@@ -573,10 +569,13 @@
   // Visual feedback for API Key input
   function checkApiState() {
     const btn = document.getElementById('saveApiBtn');
-    btn.textContent = "Save";
-    btn.classList.remove('saved');
+    if (!btn.classList.contains('saved')) {
+      btn.textContent = "Save";
+    }
     if(document.getElementById('apiKey').value.trim() === '') {
       document.getElementById('modeBadge').style.display = 'inline-block';
+      btn.classList.remove('saved');
+      btn.textContent = "Save";
     }
   }
 
@@ -587,14 +586,10 @@
       btn.textContent = "All Set! ✨";
       btn.classList.add('saved');
       document.getElementById('modeBadge').style.display = 'none';
-      setTimeout(() => {
-        btn.textContent = "Ready";
-        btn.classList.remove('saved');
-        btn.style.borderColor = "var(--primary-pink)";
-        btn.style.color = "var(--primary-pink)";
-      }, 2000);
+      // Notice: Removed the setTimeout so it STAYS as "All Set!"
     } else {
       btn.textContent = "Key Cleared";
+      btn.classList.remove('saved');
       document.getElementById('modeBadge').style.display = 'inline-block';
       setTimeout(() => { btn.textContent = "Save"; }, 1500);
     }
@@ -678,18 +673,21 @@
     document.getElementById('modeBadge').style.display = 'none';
     const provider = document.getElementById('apiProvider').value;
     
-    const systemPrompt = `You are an anime/literary oracle. When given a film, anime, game, or book title, produce ONE memorable, meaningful quote from it.
-Respond ONLY with a JSON object format below. Fill in both original language and English translations. If author is unknown, use "Unknown".
+    // UPDATED PROMPT: English > Chinese translation logic + Fortune Teller
+    const systemPrompt = `You are an anime/literary oracle and fortune teller. When given a film, anime, game, or book title, produce ONE memorable, meaningful quote from it.
+Respond ONLY with a JSON object format below. 
+If the original language of the work is English, provide a Chinese translation for the "_translated" fields. If the original language is NOT English (like Japanese), provide an English translation for the "_translated" fields.
+If author is unknown, use "Unknown".
 {
-  "title_original": "Original title (e.g., Japanese, Spanish)",
-  "title_english": "English title",
+  "title_original": "Original title (e.g., Japanese, Spanish, English)",
+  "title_translated": "Translated title (Chinese if original is English, else English)",
   "author_original": "Creator/Author's name in original language",
-  "author_english": "Creator/Author's name in English",
+  "author_translated": "Creator/Author's name translated",
   "context_original": "Character/Role who said it in original language",
-  "context_english": "Character/Role who said it in English",
+  "context_translated": "Character/Role who said it translated",
   "quote_original": "The exact quote in its original language",
-  "quote_english": "The English translation of the quote",
-  "note": "Why it's cool or meaningful (max 20 words)"
+  "quote_translated": "The translated quote",
+  "fortune": "A funny daily fortune, lucky color, lucky food, or small advice based on the quote's vibe (max 20 words)"
 }`;
     const userPrompt = `Give me a meaningful quote from: "${currentSource}"`;
 
@@ -697,7 +695,6 @@ Respond ONLY with a JSON object format below. Fill in both original language and
       let rawJsonText = '';
 
       if (provider === 'gemini') {
-        // EXACT CODE FROM EGGNOCK-2
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
         const opts = { 
           method: 'POST', 
@@ -705,7 +702,7 @@ Respond ONLY with a JSON object format below. Fill in both original language and
           body: JSON.stringify({ 
             system_instruction: { parts: [{ text: systemPrompt }] }, 
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }], 
-            generationConfig: { maxOutputTokens: 280 } 
+            generationConfig: { maxOutputTokens: 300 } 
           }) 
         };
         const res = await fetch(url, opts);
@@ -722,7 +719,7 @@ Respond ONLY with a JSON object format below. Fill in both original language and
           body: JSON.stringify({
             model: model,
             messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-            max_tokens: 280,
+            max_tokens: 300,
             response_format: { type: "json_object" }
           })
         });
@@ -736,7 +733,7 @@ Respond ONLY with a JSON object format below. Fill in both original language and
           headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerously-allow-browser': 'true' },
           body: JSON.stringify({
             model: 'claude-3-haiku-20240307',
-            max_tokens: 280,
+            max_tokens: 300,
             system: systemPrompt,
             messages: [{ role: 'user', content: userPrompt }]
           })
@@ -746,12 +743,11 @@ Respond ONLY with a JSON object format below. Fill in both original language and
         rawJsonText = data.content?.[0]?.text || '';
       }
 
-      // Exact parsing logic matching Eggnock 2
       let parsed;
       try { 
         parsed = JSON.parse(rawJsonText.replace(/```json|```/g,'').trim()); 
       } catch(e) { 
-        parsed = { quote_original: "Error parsing AI response.", quote_english: rawJsonText }; 
+        parsed = { quote_original: "Error parsing AI response.", quote_translated: rawJsonText }; 
       }
       
       pendingQuote = parsed;
@@ -792,33 +788,33 @@ Respond ONLY with a JSON object format below. Fill in both original language and
     setTimeout(() => {
       egg.style.display = 'none';
       document.getElementById('quoteOriginal').textContent = '\u201C' + (pendingQuote.quote_original || '...') + '\u201D';
-      document.getElementById('quoteEnglish').textContent = '\u201C' + (pendingQuote.quote_english || '...') + '\u201D';
+      document.getElementById('quoteTranslated').textContent = '\u201C' + (pendingQuote.quote_translated || '...') + '\u201D';
       
-      // Formatting the Source block beautifully with Original + English
+      // Formatting the Source block beautifully with Original + Translated
       let sourceHTML = '';
       if (pendingQuote.is_ssr) {
         sourceHTML += `<strong style="color:#805ad5; font-size: 14px; letter-spacing: 0.1em;">✨ MYSTERY SSR DROP ✨</strong><br>`;
       }
       
       sourceHTML += `<strong style="color:var(--primary-blue); font-size: 16px;">${pendingQuote.title_original || currentSource}</strong>`;
-      if (pendingQuote.title_english && pendingQuote.title_english !== pendingQuote.title_original) {
-        sourceHTML += `<br><span style="font-weight: 700; font-size: 13px; opacity: 0.8;">${pendingQuote.title_english}</span>`;
+      if (pendingQuote.title_translated && pendingQuote.title_translated !== pendingQuote.title_original) {
+        sourceHTML += `<br><span style="font-weight: 700; font-size: 13px; opacity: 0.8;">${pendingQuote.title_translated}</span>`;
       }
       
-      if (pendingQuote.author_original || pendingQuote.author_english) {
+      if (pendingQuote.author_original || pendingQuote.author_translated) {
          sourceHTML += `<div style="margin-top: 6px; font-size: 12.5px; opacity: 0.9;">
-         ✍️ ${pendingQuote.author_original || ''} ${pendingQuote.author_english && pendingQuote.author_english !== pendingQuote.author_original ? `(${pendingQuote.author_english})` : ''}
+         ✍️ ${pendingQuote.author_original || ''} ${pendingQuote.author_translated && pendingQuote.author_translated !== pendingQuote.author_original ? `(${pendingQuote.author_translated})` : ''}
          </div>`;
       }
 
-      if (pendingQuote.context_original || pendingQuote.context_english) {
+      if (pendingQuote.context_original || pendingQuote.context_translated) {
         sourceHTML += `<div style="margin-top: 8px; font-size: 13px;">
-        🗣️ ${pendingQuote.context_original || ''} ${pendingQuote.context_english && pendingQuote.context_english !== pendingQuote.context_original ? `(${pendingQuote.context_english})` : ''}
+        🗣️ ${pendingQuote.context_original || ''} ${pendingQuote.context_translated && pendingQuote.context_translated !== pendingQuote.context_original ? `(${pendingQuote.context_translated})` : ''}
         </div>`;
       }
       
-      if (pendingQuote.note) {
-        sourceHTML += `<div style="margin-top: 8px; opacity:0.8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 8px;">💡 ${pendingQuote.note}</div>`;
+      if (pendingQuote.fortune) {
+        sourceHTML += `<div style="margin-top: 8px; opacity:0.8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 8px;">💡 ${pendingQuote.fortune}</div>`;
       }
 
       document.getElementById('quoteSource').innerHTML = sourceHTML;
